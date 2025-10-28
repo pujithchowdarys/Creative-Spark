@@ -2,12 +2,6 @@
 import { GoogleGenAI, Modality } from "@google/genai";
 import type { IdeaType, SubType } from '../types';
 
-const API_KEY = process.env.API_KEY;
-
-if (!API_KEY) {
-    console.error("API_KEY environment variable not set. Please ensure it's configured in your deployment environment (e.g., Vercel) and accessible via `process.env.API_KEY`.");
-}
-
 const createPrompt = (idea: string, type: IdeaType, subType: SubType, language: string): string => {
     let prompt = '';
     const audience = subType === 'Kids' ? 'for young children' : 'for a general audience';
@@ -37,6 +31,8 @@ export const generateCreativeContent = async (
     language: string,
     voiceName: string
 ) => {
+    const API_KEY = process.env.API_KEY;
+
     if (!API_KEY) {
         throw new Error("API Key (process.env.API_KEY) is missing. Please ensure it's set in your environment configuration.");
     }
