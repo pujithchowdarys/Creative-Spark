@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import IdeaForm from './components/IdeaForm';
 import ResultDisplay from './components/ResultDisplay';
 import Loader from './components/Loader';
@@ -19,48 +19,18 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   
   // New state for API key management
-  const [showApiKeyPrompt, setShowApiKeyPrompt] = useState<boolean>(true);
-  const [isApiKeySelectionLoading, setIsApiKeySelectionLoading] = useState<boolean>(false);
+  const [apiKey, setApiKey] = useState<string>('');
+  const [isApiKeyEntered, setIsApiKeyEntered] = useState<boolean>(false);
+  const [apiKeyInputError, setApiKeyInputError] = useState<string | null>(null);
 
-  // Function to check API key status
-  const checkApiKeyStatus = async () => {
-    // Assuming window.aistudio is globally available and typed externally as per guidelines
-    if (window.aistudio && typeof window.aistudio.hasSelectedApiKey === 'function') {
-      const hasKey = await window.aistudio.hasSelectedApiKey();
-      setShowApiKeyPrompt(!hasKey);
-    } else {
-      // Fallback if aistudio API is not available (e.g., local development without AI Studio wrapper)
-      // Assume API key is available via process.env.API_KEY if aistudio is not present
-      console.warn("window.aistudio.hasSelectedApiKey is not available. Assuming API key is set via environment variable.");
-      setShowApiKeyPrompt(false); 
+  const handleApiKeySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setApiKeyInputError(null);
+    if (apiKey.trim() === '') {
+      setApiKeyInputError("API Key cannot be empty.");
+      return;
     }
-  };
-
-  // Effect to check API key status on mount
-  useEffect(() => {
-    checkApiKeyStatus();
-  }, []); // Run once on mount
-
-  const handleSelectApiKey = async () => {
-    // Assuming window.aistudio is globally available and typed externally as per guidelines
-    if (window.aistudio && typeof window.aistudio.openSelectKey === 'function') {
-      setIsApiKeySelectionLoading(true);
-      try {
-        await window.aistudio.openSelectKey();
-        // Optimistically assume key selection was successful to avoid race conditions.
-        setShowApiKeyPrompt(false);
-      } catch (e) {
-        console.error("Failed to open API key selection dialog:", e);
-        setError("Failed to open API key selection dialog. Please try again.");
-      } finally {
-        setIsApiKeySelectionLoading(false);
-      }
-    } else {
-      setError("API key selection utility (window.aistudio.openSelectKey) is not available.");
-      console.error("window.aistudio.openSelectKey is not available.");
-      // If aistudio is not present, we can't open the dialog, so we proceed assuming env var is set
-      setShowApiKeyPrompt(false); 
-    }
+    setIsApiKeyEntered(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -69,43 +39,32 @@ const App: React.FC = () => {
     setGeneratedText('');
     setBase64Audio(null);
 
-    // First, check if an API key is selected.
-    // This check is performed before `setIsLoading(true)` so the button doesn't look stuck.
-    // Assuming window.aistudio is globally available and typed externally as per guidelines
-    if (window.aistudio && typeof window.aistudio.hasSelectedApiKey === 'function') {
-      const hasKey = await window.aistudio.hasSelectedApiKey();
-      if (!hasKey) {
-        setShowApiKeyPrompt(true); // Ensure the prompt is visible
-        setError("Please select an API key before generating content.");
-        return; // Prevent further execution if no key is selected
-      }
-    } else {
-      // If aistudio API is not available, proceed assuming API key is set via env var
-      console.warn("window.aistudio.hasSelectedApiKey is not available. Proceeding with generation, assuming API key is set.");
+    if (!isApiKeyEntered || apiKey.trim() === '') {
+      setError("Please enter and save your API key first.");
+      setIsApiKeyEntered(false); // Go back to API key input form
+      return;
     }
 
     setIsLoading(true);
 
     try {
-      // CRITICAL: Create a new GoogleGenAI instance right before making an API call
-      // to ensure it always uses the most up-to-date API key from the dialog.
-      // Do not create GoogleGenAI when the component is first rendered.
       const selectedLanguage = LANGUAGES.find(lang => lang.value === language);
       if (!selectedLanguage) {
         throw new Error("Invalid language selected.");
       }
 
-      const result = await generateCreativeContent(idea, ideaType, subType, selectedLanguage.value, selectedLanguage.voiceName);
+      const result = await generateCreativeContent(apiKey, idea, ideaType, subType, selectedLanguage.value, selectedLanguage.voiceName);
       setGeneratedText(result.generatedText);
       setBase64Audio(result.base64Audio);
     } catch (err: any) {
       console.error(err);
       if (err.message && err.message.includes("Requested entity was not found.")) {
-        setError("Your API key might be invalid or not properly configured. Please select your API key again.");
-        setShowApiKeyPrompt(true); // Re-prompt for key selection
-      } else if (err.message && err.message.includes("API Key (process.env.API_KEY) is missing")) {
-        setError("API Key is missing. Please select your API key.");
-        setShowApiKeyPrompt(true);
+        setError("Your API key might be invalid or not properly configured. Please re-enter your API key.");
+        setIsApiKeyEntered(false); // Re-prompt for key entry
+        setApiKey(''); // Clear the invalid key
+      } else if (err.message && err.message.includes("API Key is missing")) {
+        setError("API Key is missing. Please enter your API key.");
+        setIsApiKeyEntered(false); // Re-prompt for key entry
       }
       else {
         setError('An error occurred while generating content. Please try again.');
@@ -135,19 +94,44 @@ const App: React.FC = () => {
         </header>
 
         <main className="w-full">
-            {showApiKeyPrompt ? (
+            {!isApiKeyEntered ? (
                 <div className="bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8 w-full space-y-4 animate-fade-in">
-                    <h3 className="text-2xl font-bold text-yellow-300 text-center">API Key Required</h3>
+                    <h3 className="text-2xl font-bold text-yellow-300 text-center mb-4">Enter Your Google Gemini API Key</h3>
+                    
+                    {/* API Key Instructions */}
+                    <div className="bg-gray-700/50 p-4 rounded-lg space-y-3 mb-6">
+                        <h4 className="text-xl font-bold text-yellow-200">How to get your Google Gemini API Key:</h4>
+                        <ol className="list-decimal list-inside text-gray-300 space-y-2">
+                            <li>Go to <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Google AI Studio API Key page</a>.</li>
+                            <li>If prompted, sign in with your Google account.</li>
+                            <li>Create a new project or select an existing one.</li>
+                            <li>Click "Create API key in new project" (or locate an existing key).</li>
+                            <li>Copy the generated API key and paste it below.</li>
+                        </ol>
+                    </div>
+
                     <p className="text-gray-300 text-center">
-                        To use this application and manage your usage costs, please select your Google Gemini API key.
+                        To use this application, please provide your Google Gemini API key. This helps you manage your own usage and associated billing.
                     </p>
-                    <button
-                        onClick={handleSelectApiKey}
-                        disabled={isApiKeySelectionLoading}
-                        className="w-full py-3 text-lg font-bold bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
-                    >
-                        {isApiKeySelectionLoading ? 'Opening Key Selector...' : 'Select Your API Key'}
-                    </button>
+                    <form onSubmit={handleApiKeySubmit} className="space-y-4">
+                        <input
+                            type="password" // Use type="password" for sensitive info, but user can change to text to see it.
+                            value={apiKey}
+                            onChange={(e) => setApiKey(e.target.value)}
+                            placeholder="Paste your API key here (e.g., AIzaSy...)"
+                            className="w-full p-3 bg-gray-900/50 border-2 border-gray-700 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-colors duration-300 text-white"
+                            required
+                        />
+                        {apiKeyInputError && (
+                            <p className="text-red-400 text-sm text-center">{apiKeyInputError}</p>
+                        )}
+                        <button
+                            type="submit"
+                            className="w-full py-3 text-lg font-bold bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors duration-300 transform hover:scale-105"
+                        >
+                            Save Key and Start Creating
+                        </button>
+                    </form>
                     <p className="text-sm text-gray-400 text-center mt-4">
                         Charges may apply based on your API usage. Learn more about billing: <br/>
                         <a href="https://ai.google.dev/gemini-api/docs/billing" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">ai.google.dev/gemini-api/docs/billing</a>

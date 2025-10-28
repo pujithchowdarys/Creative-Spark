@@ -25,19 +25,18 @@ const createPrompt = (idea: string, type: IdeaType, subType: SubType, language: 
 }
 
 export const generateCreativeContent = async (
+    apiKey: string, // API Key is now passed as an argument
     idea: string,
     type: IdeaType,
     subType: SubType,
     language: string,
     voiceName: string
 ) => {
-    const API_KEY = process.env.API_KEY;
-
-    if (!API_KEY) {
-        throw new Error("API Key (process.env.API_KEY) is missing. Please ensure it's set in your environment configuration.");
+    if (!apiKey) {
+        throw new Error("API Key is missing. Please enter your API key to proceed.");
     }
 
-    const ai = new GoogleGenAI({ apiKey: API_KEY });
+    const ai = new GoogleGenAI({ apiKey: apiKey });
     
     // 1. Generate Text Content
     const textPrompt = createPrompt(idea, type, subType, language);
