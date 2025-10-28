@@ -86,7 +86,7 @@ const App: React.FC = () => {
       <div className="w-full max-w-3xl mx-auto space-y-8">
         <header className="text-center">
           <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
-            Creative Spark
+            Pujiverse Creation Spark
           </h1>
           <p className="mt-2 text-lg text-gray-400">
             Turn your ideas into songs, stories, and narrations.
@@ -98,18 +98,6 @@ const App: React.FC = () => {
                 <div className="bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8 w-full space-y-4 animate-fade-in">
                     <h3 className="text-2xl font-bold text-yellow-300 text-center mb-4">Enter Your Google Gemini API Key</h3>
                     
-                    {/* API Key Instructions */}
-                    <div className="bg-gray-700/50 p-4 rounded-lg space-y-3 mb-6">
-                        <h4 className="text-xl font-bold text-yellow-200">How to get your Google Gemini API Key:</h4>
-                        <ol className="list-decimal list-inside text-gray-300 space-y-2">
-                            <li>Go to <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Google AI Studio API Key page</a>.</li>
-                            <li>If prompted, sign in with your Google account.</li>
-                            <li>Create a new project or select an existing one.</li>
-                            <li>Click "Create API key in new project" (or locate an existing key).</li>
-                            <li>Copy the generated API key and paste it below.</li>
-                        </ol>
-                    </div>
-
                     <p className="text-gray-300 text-center">
                         To use this application, please provide your Google Gemini API key. This helps you manage your own usage and associated billing.
                     </p>
