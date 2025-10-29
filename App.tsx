@@ -10,7 +10,7 @@ import { LANGUAGES } from './constants';
 const App: React.FC = () => {
   const [idea, setIdea] = useState<string>('');
   const [ideaType, setIdeaType] = useState<IdeaType>('Song');
-  const [subType, setSubType] = useState<SubType>('Regular');
+  const [subType, setSubType] = useState<SubType>('Adult');
   const [language, setLanguage] = useState<string>(LANGUAGES[0].value);
   
   const [generatedText, setGeneratedText] = useState<string>('');

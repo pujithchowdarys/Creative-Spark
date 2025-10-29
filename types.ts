@@ -1,5 +1,5 @@
 export type IdeaType = 'Song' | 'Story' | 'Narration / Description';
-export type SubType = 'Kids' | 'Regular';
+export type SubType = 'Kids' | 'Adult';
 
 export interface Language {
   value: string;

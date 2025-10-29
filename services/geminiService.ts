@@ -4,7 +4,7 @@ import type { IdeaType, SubType } from '../types';
 
 const createPrompt = (idea: string, type: IdeaType, subType: SubType, language: string): string => {
     let prompt = '';
-    const audience = subType === 'Kids' ? 'for young children' : 'for a general audience';
+    const audience = subType === 'Kids' ? 'for young children' : 'for adults';
     const languageInstruction = ` in the ${language} language`;
 
     switch (type) {
