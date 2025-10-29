@@ -101,6 +101,10 @@ const App: React.FC = () => {
                     <p className="text-gray-300 text-center">
                         To use this application, please provide your Google Gemini API key. This helps you manage your own usage and associated billing.
                     </p>
+                    <p className="text-gray-300 text-center text-sm mb-4">
+                        Don't have an API key? You can create one for free at <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Google AI Studio</a>.
+                        Just click "Create API key in new project" to get started.
+                    </p>
                     <form onSubmit={handleApiKeySubmit} className="space-y-4">
                         <input
                             type="password" // Use type="password" for sensitive info, but user can change to text to see it.
