@@ -3,12 +3,10 @@ import { DownloadIcon } from './icons';
 import { decode, decodePcmToAudioBuffer, createWavBlob } from '../utils/audioUtils';
 import { SPEAKER_VOICES } from '../constants';
 import { generateAudioFromText } from '../services/geminiService';
-// Fix: Import CreativeContentOutput and use it for the prop type
-import type { IdeaType, Dialogue, CreativeContentOutput } from '../types'; 
+import type { IdeaType, Dialogue, CreativeContentOutput } from '../types'; // Import CreativeContentOutput
 
 interface ResultDisplayProps {
-  // Fix: Update the generatedContent prop type to CreativeContentOutput
-  generatedContent: CreativeContentOutput | null;
+  generatedContent: CreativeContentOutput | null; // Updated prop type
   ideaType: IdeaType;
   apiKey: string;
 }
@@ -59,12 +57,11 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ generatedContent, ideaTyp
   }, [currentAudioBase64]);
 
 
-  // Fix: Helper to format content for display and text download (now includes moral)
+  // Helper to format content for display and text download (now includes moral)
   const formattedContentForTextAndAudio = useMemo(() => {
     if (!generatedContent) return '';
 
     let mainText = '';
-    // Fix: Access generatedContent.mainContent
     if (ideaType === 'Narration / Description' && typeof generatedContent.mainContent !== 'string') {
       const dialogueContent = generatedContent.mainContent as Dialogue;
       if (dialogueContent.title) {
@@ -100,7 +97,6 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ generatedContent, ideaTyp
   };
 
   const handleDownloadText = () => {
-    // Fix: Use formattedContentForTextAndAudio which includes the moral
     if (!formattedContentForTextAndAudio) return;
     const blob = new Blob([formattedContentForTextAndAudio], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -129,7 +125,6 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ generatedContent, ideaTyp
   };
 
   const handleGenerateAudio = async () => {
-    // Fix: Use formattedContentForTextAndAudio for audio generation
     if (!formattedContentForTextAndAudio) {
       setAudioError("No text content available to generate audio.");
       return;
@@ -151,15 +146,13 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ generatedContent, ideaTyp
     }
   };
   
-  // Fix: Render nothing if no content
-  if (!generatedContent) return null;
+  if (!generatedContent) return null; // Render nothing if no content
 
   return (
     <div className="bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8 w-full space-y-6 animate-fade-in">
       <div>
         <h3 className="text-2xl font-bold text-purple-300 mb-4">Generated Content</h3>
         <div className="bg-gray-900/50 rounded-lg p-4 max-h-96 overflow-y-auto whitespace-pre-wrap font-mono text-gray-300">
-          {/* Fix: Access generatedContent.mainContent for display */}
           {ideaType === 'Narration / Description' && typeof generatedContent.mainContent !== 'string' ? (
             <>
               {generatedContent.mainContent.title && <p className="text-xl font-bold mb-4">{generatedContent.mainContent.title}</p>}
@@ -174,7 +167,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ generatedContent, ideaTyp
           )}
         </div>
         
-        {/* Fix: Moral of the Story Section */}
+        {/* Moral of the Story Section */}
         {generatedContent.moral && (
           <div className="mt-6 p-4 bg-gray-900/50 border-l-4 border-purple-500 rounded-lg">
             <h4 className="text-lg font-semibold text-purple-300 mb-2">Moral of the Story:</h4>
@@ -191,7 +184,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ generatedContent, ideaTyp
         </button>
       </div>
 
-      {generatedContent && ( // Check if generatedContent exists before rendering audio options
+      {generatedContent && (
         <div>
           <h3 className="text-2xl font-bold text-purple-300 mb-4">Voiceover Options</h3>
           <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">

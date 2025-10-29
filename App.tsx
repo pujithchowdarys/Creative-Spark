@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import IdeaForm from './components/IdeaForm';
 import ResultDisplay from './components/ResultDisplay';
 import Loader from './components/Loader';
 import { generateCreativeContent } from './services/geminiService';
-import type { IdeaType, SubType } from './types';
+import type { IdeaType, SubType, CreativeContentOutput } from './types'; // Import CreativeContentOutput
 import { LANGUAGES } from './constants';
 
 const App: React.FC = () => {
@@ -13,8 +12,7 @@ const App: React.FC = () => {
   const [subType, setSubType] = useState<SubType>('Adult');
   const [language, setLanguage] = useState<string>(LANGUAGES[0].value);
   
-  const [generatedText, setGeneratedText] = useState<string>('');
-  const [base64Audio, setBase64Audio] = useState<string | null>(null);
+  const [generatedContent, setGeneratedContent] = useState<CreativeContentOutput | null>(null); // Updated type
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -36,8 +34,7 @@ const App: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setGeneratedText('');
-    setBase64Audio(null);
+    setGeneratedContent(null); // Reset content
 
     if (!isApiKeyEntered || apiKey.trim() === '') {
       setError("Please enter and save your API key first.");
@@ -53,9 +50,8 @@ const App: React.FC = () => {
         throw new Error("Invalid language selected.");
       }
 
-      const result = await generateCreativeContent(apiKey, idea, ideaType, subType, selectedLanguage.value, selectedLanguage.voiceName);
-      setGeneratedText(result.generatedText);
-      setBase64Audio(result.base64Audio);
+      const result = await generateCreativeContent(apiKey, idea, ideaType, subType, selectedLanguage.value);
+      setGeneratedContent(result.generatedContent);
     } catch (err: any) {
       console.error(err);
       if (err.message && err.message.includes("Requested entity was not found.")) {
@@ -152,8 +148,12 @@ const App: React.FC = () => {
 
                     <div className="mt-8">
                         {isLoading && <Loader />}
-                        {!isLoading && generatedText && (
-                        <ResultDisplay text={generatedText} base64Audio={base64Audio} ideaType={ideaType}/>
+                        {!isLoading && generatedContent && (
+                        <ResultDisplay 
+                            generatedContent={generatedContent} // Pass the new object
+                            ideaType={ideaType} 
+                            apiKey={apiKey}
+                        />
                         )}
                     </div>
                 </>
